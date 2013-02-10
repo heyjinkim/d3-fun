@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Bubbles Packing</title>
+<style>
+
+circle {
+  fill: rgb(31, 119, 180);
+  fill-opacity: .25;
+}
+
+.inner circle {
+  fill: #ff7f0e;
+}
+
+.inner circle:hover {
+  stroke: #af5e61;
+  stroke-width: 5px;
+}
+
+.inner circle.active {
+  stroke: #af5e61;
+  stroke-width: 2px;
+}
+
+text {
+  font: 10px sans-serif;
+}
+</style>
+<body>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script>
+
+var diameter = 700,
+    format = d3.format(",d");
+
+var pack = d3.layout.pack()
+    .size([diameter - 4, diameter - 4])
+    .value(function(d) { return d.size; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+  .append("g")
+    .attr("transform", "translate(2,2)");
+
+d3.json("/data/bubble.json", function(error, data) {
+  var root = { children: data.slice(0, 50) };
+  var maxScore = d3.max(data, function(d) { return d.score; });
+
+  var node = svg.datum(root).selectAll(".node")
+      .data(pack.nodes)
+    .enter().append("g")
+      .attr("class", function(d) { return d.children ? "node" : "inner node"; })
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  node.append("title")
+      .text(function(d) { return d.username + (d.children ? "" : ": " + format(d.follwers)); });
+
+  node.append("circle")
+      .attr("id", function(d){ return "circle_"+d.username; })
+      .attr("r", function(d) { return d.r; })
+      .attr("style", function(d){ return "fill-opacity:"+d.score/maxScore; })
+      .on('click', function(d){
+        $('circle').attr("class", "");
+        $(this).attr("class", "active");
+      });
+
+  node.filter(function(d) { return !d.children; }).append("text")
+      .attr("dy", ".3em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.username.substring(0, d.r / 3); });
+});
+</script>
