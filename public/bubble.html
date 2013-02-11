@@ -55,7 +55,7 @@ d3.json("/data/bubble.json", function(error, data) {
       .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   node.append("title")
-      .text(function(d) { return d.username + (d.children ? "" : ": " + format(d.follwers)); });
+      .text(function(d) { return d.username + (d.children ? "" : ": " + format(d.size)); });
 
   node.append("circle")
       .attr("id", function(d){ return "circle_"+d.username; })
